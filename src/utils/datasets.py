@@ -45,7 +45,7 @@ def readEXR_onlydepth(filename):
 
 
 def get_dataset(cfg, args, scale, device='cuda:0'):
-    return dataset_dict[cfg['dataset']](cfg, args, scale, device=device)
+    return dataset_dict[cfg['dataset']](cfg, args, scale, device=device) # replica
 
 
 class BaseDataset(Dataset):
@@ -118,11 +118,12 @@ class Replica(BaseDataset):
                  ):
         super(Replica, self).__init__(cfg, args, scale, device)
         self.color_paths = sorted(
-            glob.glob(f'{self.input_folder}/results/frame*.jpg'))
+            glob.glob(f'{self.input_folder}/rgb/rgb*.jpg'))
         self.depth_paths = sorted(
-            glob.glob(f'{self.input_folder}/results/depth*.png'))
+            glob.glob(f'{self.input_folder}/depth/depth*.png'))
         self.n_img = len(self.color_paths)
-        self.load_poses(f'{self.input_folder}/traj.txt')
+        self.load_poses(f'{self.input_folder}/traj_w_c.txt') # TODO: traj_w_c.txt 파일이 변환이 된 파일인가 아닌가
+        self.seg_paths = sorted(glob.glob(f'{self.input_folder}/semantic_class/semantic_class_*.png')) # TODO: vis_sem_class*.png 파일들은 어떻게 해야하는가? 기존의 semantic_nerf에서도 안씀.
 
     def load_poses(self, path):
         self.poses = []

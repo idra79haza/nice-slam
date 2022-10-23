@@ -37,11 +37,13 @@ if __name__ == '__main__':
         args.config, 'configs/nice_slam.yaml' if args.nice else 'configs/imap.yaml')
     scale = cfg['scale']
     output = cfg['data']['output'] if args.output is None else args.output
+    print(output)
     if args.vis_input_frame:
         frame_reader = get_dataset(cfg, args, scale, device='cpu')
         frame_loader = DataLoader(
-            frame_reader, batch_size=1, shuffle=False, num_workers=4)
+            frame_reader, batch_size=1, shuffle=Falsec, num_workers=4)
     ckptsdir = f'{output}/ckpts'
+    print(ckptsdir)
     if os.path.exists(ckptsdir):
         ckpts = [os.path.join(ckptsdir, f)
                  for f in sorted(os.listdir(ckptsdir)) if 'tar' in f]

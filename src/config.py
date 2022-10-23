@@ -60,7 +60,7 @@ def update_recursive(dict1, dict2):
 
 
 # Models
-def get_model(cfg, nice=True):
+def get_model(cfg, ilabel_plus=True, nice=False):
     """
     Returns the model instance.
 
@@ -73,7 +73,10 @@ def get_model(cfg, nice=True):
     """
 
     method = 'conv_onet'
-    model = method_dict[method].config.get_model(
-        cfg,  nice=nice)
+    if ilabel_plus:
+        model = method_dict[method].config.get_model(cfg, ilabel_plus=ilabel_plus, nice=nice)
+    else:
+        model = method_dict[method].config.get_model( # 여기서의 config파일은 nice-slam전체의 config파일이 아니라 conv_onet의 config.
+            cfg,  ilabel_plus, nice=nice)
 
     return model

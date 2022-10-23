@@ -1,7 +1,7 @@
 coarse: True
 sync_method: strict
 scale: 1
-verbose: True
+verbose: True # 상세한 설명을 할 것인가. 0: 출력하지 않는다. 1: 자세히 2: 함축적인 정보만
 occupancy: True
 low_gpu_mem: True
 grid_len:
@@ -41,7 +41,7 @@ tracking:
   pixels: 200
   iters: 10
 mapping:
-  device: "cuda:0"
+  device: "cuda:1"
   color_refine: True
   middle_iter_ratio: 0.4
   fine_iter_ratio: 0.6

@@ -21,10 +21,10 @@ class Tracker(object):
         self.cfg = cfg
         self.args = args
 
-        self.scale = cfg['scale']
+        self.scale = cfg['scale'] # 1
         self.coarse = cfg['coarse']
         self.occupancy = cfg['occupancy']
-        self.sync_method = cfg['sync_method']
+        self.sync_method = cfg['sync_method'] #strict
 
         self.idx = slam.idx
         self.nice = slam.nice
@@ -38,11 +38,11 @@ class Tracker(object):
         self.low_gpu_mem = slam.low_gpu_mem
         self.mapping_idx = slam.mapping_idx
         self.mapping_cnt = slam.mapping_cnt
-        self.shared_decoders = slam.shared_decoders
+        self.shared_decoders = slam.shared_decoders # model
         self.estimate_c2w_list = slam.estimate_c2w_list
 
         self.cam_lr = cfg['tracking']['lr']
-        self.device = cfg['tracking']['device']
+        self.device = cfg['tracking']['device'] # device: "cuda:0"
         self.num_cam_iters = cfg['tracking']['iters']
         self.gt_camera = cfg['tracking']['gt_camera']
         self.tracking_pixels = cfg['tracking']['pixels']
@@ -59,7 +59,7 @@ class Tracker(object):
 
         self.prev_mapping_idx = -1
         self.frame_reader = get_dataset(
-            cfg, args, self.scale, device=self.device)
+            cfg, args, self.scale, device=self.device) # scale = 1, device = cuda:0
         self.n_img = len(self.frame_reader)
         self.frame_loader = DataLoader(
             self.frame_reader, batch_size=1, shuffle=False, num_workers=1)
@@ -103,6 +103,7 @@ class Tracker(object):
             batch_gt_depth = batch_gt_depth[inside_mask]
             batch_gt_color = batch_gt_color[inside_mask]
 
+        #TODO: 여기에 depth, uncertainty, color, seg = ret 이런 식으로 결과가 나와야 함.
         ret = self.renderer.render_batch_ray(
             self.c, self.decoders, batch_rays_d, batch_rays_o,  self.device, stage='color',  gt_depth=batch_gt_depth)
         depth, uncertainty, color = ret
@@ -132,7 +133,7 @@ class Tracker(object):
         Update the parameters of scene representation from the mapping thread.
 
         """
-        if self.mapping_idx[0] != self.prev_mapping_idx:
+        if self.mapping_idx[0] != self.prev_mapping_idx: # mapping_idx의 첫 값이 전 mapping_idx랑 다르면
             if self.verbose:
                 print('Tracking: update the parameters from mapping')
             self.decoders = copy.deepcopy(self.shared_decoders).to(self.device)
@@ -141,24 +142,26 @@ class Tracker(object):
                 self.c[key] = val
             self.prev_mapping_idx = self.mapping_idx[0].clone()
 
+    # 기본적인 학습을 위한 실행 파일이 들어가 있음.
     def run(self):
-        device = self.device
-        self.c = {}
-        if self.verbose:
+        device = self.device # device: "cuda:0"
+        self.c = {} # dictionary 생성
+        if self.verbose: # True
             pbar = self.frame_loader
         else:
-            pbar = tqdm(self.frame_loader)
+            pbar = tqdm(self.frame_loader) # 진행표 보여주는 라이브러리
 
         for idx, gt_color, gt_depth, gt_c2w in pbar:
             if not self.verbose:
                 pbar.set_description(f"Tracking Frame {idx[0]}")
 
+            # 초기화 진행
             idx = idx[0]
             gt_depth = gt_depth[0]
             gt_color = gt_color[0]
             gt_c2w = gt_c2w[0]
 
-            if self.sync_method == 'strict':
+            if self.sync_method == 'strict': # 이걸로 진행하는 것
                 # strictly mapping and then tracking
                 # initiate mapping every self.every_frame frames
                 if idx > 0 and (idx % self.every_frame == 1 or self.every_frame == 1):
@@ -177,7 +180,7 @@ class Tracker(object):
             self.update_para_from_mapping()
 
             if self.verbose:
-                print(Fore.MAGENTA)
+                print(Fore.MAGENTA) # 색
                 print("Tracking Frame ",  idx.item())
                 print(Style.RESET_ALL)
 
@@ -254,5 +257,7 @@ class Tracker(object):
             self.gt_c2w_list[idx] = gt_c2w.clone().cpu()
             pre_c2w = c2w.clone()
             self.idx[0] = idx
+
+            # 터질거 대비 비워주기
             if self.low_gpu_mem:
                 torch.cuda.empty_cache()

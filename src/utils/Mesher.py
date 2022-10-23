@@ -353,6 +353,7 @@ class Mesher(object):
                  keyframe_dict,
                  estimate_c2w_list,
                  idx,
+                 segmentation=True,
                  device='cuda:0',
                  show_forecast=False,
                  color=True,
@@ -371,6 +372,7 @@ class Mesher(object):
             device (str, optional): device name to compute on. Defaults to 'cuda:0'.
             show_forecast (bool, optional): show forecast. Defaults to False.
             color (bool, optional): whether to extract colored mesh. Defaults to True.
+            segmentation (bool): whether to extract colored segmentation mesh. Defaults to True.
             clean_mesh (bool, optional): whether to clean the output mesh 
                                         (remove outliers outside the convexhull and small geometry noise). 
                                         Defaults to True.

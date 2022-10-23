@@ -1,7 +1,7 @@
-inherit_from: configs/Replica/replica.yaml
+inherit_from: configs/Replica/replica_iLabel_plus.yaml
 mapping:
   bound: [[-5.5,5.9],[-6.7,5.4],[-4.7,5.3]]
   marching_cubes_bound: [[-5.5,5.9],[-6.7,5.4],[-4.7,5.3]]
 data:
-  input_folder: Datasets/Replica/office0
+  input_folder: Datasets/Replica/room_0/Sequence_1 #TODO: Change to office1
   output: output/Replica/office0
